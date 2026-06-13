@@ -92,36 +92,42 @@ window.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
 
 // Toque mobile adaptado para suportar Rotação (1 dedo) e Zoom de pinça (2 dedos)
 container.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+
     if (e.touches.length === 1) {
-        startDrag(e.touches[0].clientX, e.touches[0].clientY);
+        startDrag(
+            e.touches[0].clientX,
+            e.touches[0].clientY
+        );
     } else if (e.touches.length === 2) {
-        // Se houver 2 dedos, calcula a distância inicial entre eles para o zoom de pinça
         initialTouchDist = Math.hypot(
             e.touches[0].clientX - e.touches[1].clientX,
             e.touches[0].clientY - e.touches[1].clientY
         );
     }
-}, { passive: true });
+}, { passive: false });
 
 window.addEventListener('touchend', endDrag);
 
 container.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+
     if (e.touches.length === 1 && isDragging) {
         moveDrag(e.touches[0].clientX, e.touches[0].clientY);
     } else if (e.touches.length === 2 && initialTouchDist > 0) {
-        // Gesto de pinça ocorrendo
         const currentDist = Math.hypot(
             e.touches[0].clientX - e.touches[1].clientX,
             e.touches[0].clientY - e.touches[1].clientY
         );
+
         const deltaDist = initialTouchDist - currentDist;
         const currentDistance = camera.position.length();
-        
-        applyZoom(currentDistance + (deltaDist * 0.02));
-        initialTouchDist = currentDist; // Atualiza ponto de referência
-    }
-}, { passive: true });
 
+        applyZoom(currentDistance + (deltaDist * 0.02));
+
+        initialTouchDist = currentDist;
+    }
+}, { passive: false });
 
 // ==========================================
 // --- BANCO DE DADOS E EQUAÇÕES MATEMÁTICAS ---

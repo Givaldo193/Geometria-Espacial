@@ -3,9 +3,10 @@
 // ==========================================
 const container = document.getElementById('canvas-container');
 const scene = new THREE.Scene();
-scene.fog = new THREE.Fog(0x020617, 5, 15);
+scene.fog = new THREE.Fog(0x020617, 5, 20);
 
 const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
+// Iniciamos a câmera na posição padrão de zoom (Z = 7)
 camera.position.set(3, 3, 7);
 camera.lookAt(0, 0, 0);
 
@@ -29,13 +30,53 @@ const wireframeMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, transpa
 
 let currentObjectGroup;
 
-// --- LÓGICA DE INTERAÇÃO (Rotacionar) ---
+// ==========================================
+// --- LÓGICA DE INTERAÇÃO E ZOOM ---
+// ==========================================
 let isDragging = false;
 let previousMousePosition = { x: 0, y: 0 };
 let autoRotation = { x: 0.002, y: 0.004 };
 
+// Limites de Zoom Seguros (Distância da Câmera)
+const MIN_ZOOM = 3;
+const MAX_ZOOM = 15;
+const zoomSlider = document.getElementById('zoom-slider');
+
+// Função auxiliar para aplicar o zoom alterando a distância da câmera no vetor
+function applyZoom(targetZoom) {
+    // Restringe o valor entre o mínimo e máximo permitidos
+    const zoomVal = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, targetZoom));
+    
+    // Normaliza a posição da câmera mantendo o ângulo mas mudando a distância (Z e proporcionalmente X/Y)
+    const direction = new THREE.Vector3().copy(camera.position).normalize();
+    camera.position.copy(direction.multiplyScalar(zoomVal));
+    
+    // Sincroniza o slider visual se a mudança veio do mouse scroll
+    if (zoomSlider) {
+        zoomSlider.value = zoomVal;
+    }
+}
+
+// 1. Zoom via Roda do Mouse (Scroll)
+container.addEventListener('wheel', (e) => {
+    e.preventDefault(); // Evita que a página inteira role junto
+    const currentDistance = camera.position.length();
+    // Determina a direção do zoom com base no movimento do scroll
+    const zoomFactor = e.deltaY * 0.01; 
+    applyZoom(currentDistance + zoomFactor);
+}, { passive: false });
+
+// 2. Zoom via Slider Visual
+zoomSlider.addEventListener('input', (e) => {
+    applyZoom(parseFloat(e.target.value));
+});
+
+// Lógica de Rotação por Arraste (Mouse e Touch)
+let initialTouchDist = 0; // Armazena a distância inicial no gesto de pinça mobile
+
 const startDrag = (x, y) => { isDragging = true; previousMousePosition = { x, y }; autoRotation = { x: 0, y: 0 }; };
-const endDrag = () => { isDragging = false; };
+const endDrag = () => { isDragging = false; initialTouchDist = 0; };
+
 const moveDrag = (x, y) => {
     if (isDragging && currentObjectGroup) {
         const deltaMove = { x: x - previousMousePosition.x, y: y - previousMousePosition.y };
@@ -48,9 +89,38 @@ const moveDrag = (x, y) => {
 container.addEventListener('mousedown', (e) => startDrag(e.clientX, e.clientY));
 window.addEventListener('mouseup', endDrag);
 window.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
-container.addEventListener('touchstart', (e) => startDrag(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
+
+// Toque mobile adaptado para suportar Rotação (1 dedo) e Zoom de pinça (2 dedos)
+container.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) {
+        startDrag(e.touches[0].clientX, e.touches[0].clientY);
+    } else if (e.touches.length === 2) {
+        // Se houver 2 dedos, calcula a distância inicial entre eles para o zoom de pinça
+        initialTouchDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+        );
+    }
+}, { passive: true });
+
 window.addEventListener('touchend', endDrag);
-window.addEventListener('touchmove', (e) => moveDrag(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
+
+container.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 1 && isDragging) {
+        moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+    } else if (e.touches.length === 2 && initialTouchDist > 0) {
+        // Gesto de pinça ocorrendo
+        const currentDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+        );
+        const deltaDist = initialTouchDist - currentDist;
+        const currentDistance = camera.position.length();
+        
+        applyZoom(currentDistance + (deltaDist * 0.02));
+        initialTouchDist = currentDist; // Atualiza ponto de referência
+    }
+}, { passive: true });
 
 
 // ==========================================
@@ -64,7 +134,6 @@ const shapeConfigs = {
             { id: 'height', label: 'Altura (b)', value: 1.5 },
             { id: 'depth', label: 'Profundidade (c)', value: 1 }
         ],
-        // Função que executa o cálculo com os valores digitados pelo usuário
         calculate: (v) => {
             const ab = v.width * v.depth;
             const at = 2 * (v.width * v.height + v.width * v.depth + v.height * v.depth);
@@ -164,14 +233,13 @@ const controlsContainer = document.getElementById('controls-container');
 const formulaContainer = document.getElementById('formula-container');
 
 // ==========================================
-// --- OPERAÇÕES DE INTERFACE E CÁLCULO ---
+// --- OPERAÇÕES DE INTERFACE E GEOMETRIA ---
 // ==========================================
 
 function generateControls(shapeKey) {
     controlsContainer.innerHTML = '';
     const config = shapeConfigs[shapeKey];
 
-    // Cria os inputs numéricos na barra lateral
     config.params.forEach(param => {
         const wrapper = document.createElement('div');
         wrapper.className = 'flex flex-col gap-1';
@@ -182,7 +250,6 @@ function generateControls(shapeKey) {
         `;
         controlsContainer.appendChild(wrapper);
 
-        // Dispara a atualização matemática e visual toda vez que o usuário digita ou altera o número
         wrapper.querySelector('input').addEventListener('input', () => {
             updateGeometryAndCalculations();
         });
@@ -195,14 +262,12 @@ function updateGeometryAndCalculations() {
     const shapeKey = shapeSelect.value;
     const config = shapeConfigs[shapeKey];
     
-    // Coleta e valida os valores numéricos digitados pelo usuário
     const values = {};
     let hasInvalidValue = false;
     config.params.forEach(param => {
         const inputEl = document.getElementById(param.id);
         let val = parseFloat(inputEl.value);
         
-        // Proteção contra campos vazios, zeros ou números negativos
         if (isNaN(val) || val <= 0) {
             val = 0.1; 
             hasInvalidValue = true;
@@ -210,14 +275,12 @@ function updateGeometryAndCalculations() {
         values[param.id] = val;
     });
 
-    // 1. ATUALIZA AS FÓRMULAS E EXIBE OS RESULTADOS DO CÁLCULO
     if (hasInvalidValue) {
         formulaContainer.innerHTML = `<h3 class="font-bold text-emerald-300 text-base mb-2">${config.name}</h3><p class="text-rose-400 text-xs">Insira valores maiores que 0 para calcular.</p>`;
     } else {
         formulaContainer.innerHTML = `<h3 class="font-bold text-emerald-300 text-base mb-2">${config.name}</h3>${config.calculate(values)}`;
     }
 
-    // 2. RECONSTRÓI O OBJETO 3D NA TELA
     let prevRotation = { x: autoRotation.x, y: autoRotation.y, z: 0 };
     if (currentObjectGroup) {
         prevRotation = { x: currentObjectGroup.rotation.x, y: currentObjectGroup.rotation.y, z: currentObjectGroup.rotation.z };
@@ -228,7 +291,6 @@ function updateGeometryAndCalculations() {
     let geo;
     let mats = materialMain; 
 
-    // Limita o tamanho visual máximo no Canvas 3D para não quebrar a tela se o usuário digitar algo gigante como "100"
     const limit = (val) => Math.min(val, 4); 
 
     switch (shapeKey) {
@@ -237,7 +299,6 @@ function updateGeometryAndCalculations() {
             mats = [materialMain, materialMain, materialBase, materialBase, materialMain, materialMain];
             break;
         case 'sphere':
-            // Resolução fixa em 24 para manter desempenho independente do valor do raio
             geo = new THREE.SphereGeometry(limit(values.radius), 24, 16);
             break;
         case 'cylinder':
@@ -266,7 +327,6 @@ function updateGeometryAndCalculations() {
     scene.add(currentObjectGroup);
 }
 
-// Evento de troca de Forma Geométrica
 shapeSelect.addEventListener('change', () => {
     generateControls(shapeSelect.value);
 });
@@ -282,7 +342,6 @@ window.addEventListener('resize', () => {
 // Inicialização
 generateControls(shapeSelect.value);
 
-// Loop de animação contínua do motor 3D
 function animate() {
     requestAnimationFrame(animate);
     if (!isDragging && currentObjectGroup) {

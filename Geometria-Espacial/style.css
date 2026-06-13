@@ -1,0 +1,6 @@
+/* Garante que o canvas gerado pelo Three.js ocupe todo o espaço do container de forma responsiva */
+#canvas-container canvas { 
+    width: 100% !important; 
+    height: 100% !important; 
+    display: block; 
+}

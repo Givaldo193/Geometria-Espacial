@@ -56,9 +56,11 @@ container.addEventListener('wheel', (e) => {
     applyZoom(currentDistance + zoomFactor);
 }, { passive: false });
 
-zoomSlider.addEventListener('input', (e) => {
-    applyZoom(parseFloat(e.target.value));
-});
+if (zoomSlider) {
+    zoomSlider.addEventListener('input', (e) => {
+        applyZoom(parseFloat(e.target.value));
+    });
+}
 
 let initialTouchDist = 0; 
 
@@ -117,7 +119,7 @@ container.addEventListener('touchmove', (e) => {
 // ==========================================
 const shapeConfigs = {
     cube: {
-        name: "Paralelepípedo / Cubo",
+        name: "Paralelepipedo / Cubo",
         params: [
             { id: 'width', label: 'Largura (a)', value: 2 },
             { id: 'height', label: 'Altura (b)', value: 1.5 },
@@ -128,9 +130,9 @@ const shapeConfigs = {
             const at = 2 * (v.width * v.height + v.width * v.depth + v.height * v.depth);
             const vol = v.width * v.height * v.depth;
             return `
-                <p><strong class="text-sky-400">Área da Base (Ab = a × c):</strong><br> ${v.width} × ${v.depth} = <span class="text-amber-300 font-mono font-bold">${ab.toFixed(2)}</span></p>
-                <p><strong class="text-emerald-400">Área Total (At = 2·(ab+ac+bc)):</strong><br> <span class="text-amber-300 font-mono font-bold">${at.toFixed(2)}</span></p>
-                <p><strong class="text-white">Volume (V = a × b × c):</strong><br> ${v.width} × ${v.height} × ${v.depth} = <span class="text-amber-300 font-mono font-bold">${vol.toFixed(2)}</span></p>
+                <p><strong class="text-sky-400">Area da Base (Ab = a x c):</strong><br> ${v.width} x ${v.depth} = <span class="text-amber-300 font-mono font-bold">${ab.toFixed(2)}</span></p>
+                <p><strong class="text-emerald-400">Area Total (At = 2.(ab+ac+bc)):</strong><br> <span class="text-amber-300 font-mono font-bold">${at.toFixed(2)}</span></p>
+                <p><strong class="text-white">Volume (V = a x b x c):</strong><br> ${v.width} x ${v.height} x ${v.depth} = <span class="text-amber-300 font-mono font-bold">${vol.toFixed(2)}</span></p>
             `;
         }
     },
@@ -144,8 +146,8 @@ const shapeConfigs = {
             const area = 4 * Math.PI * Math.pow(r, 2);
             const vol = (4 / 3) * Math.PI * Math.pow(r, 3);
             return `
-                <p><strong class="text-emerald-400">Área da Superfície (A = 4 × π × r²):</strong><br> 4 × π × ${r}² = <span class="text-amber-300 font-mono font-bold">${area.toFixed(2)}</span></p>
-                <p><strong class="text-white">Volume (V = 4/3 × π × r³):</strong><br> 4/3 × π × ${r}³ = <span class="text-amber-300 font-mono font-bold">${vol.toFixed(2)}</span></p>
+                <p><strong class="text-emerald-400">Area da Superficie (A = 4 x PI x r^2):</strong><br> 4 x PI x ${r}^2 = <span class="text-amber-300 font-mono font-bold">${area.toFixed(2)}</span></p>
+                <p><strong class="text-white">Volume (V = 4/3 x PI x r^3):</strong><br> 4/3 x PI x ${r}^3 = <span class="text-amber-300 font-mono font-bold">${vol.toFixed(2)}</span></p>
             `;
         }
     },
@@ -160,10 +162,10 @@ const shapeConfigs = {
             const ab = Math.PI * Math.pow(r, 2); const al = 2 * Math.PI * r * h;
             const at = 2 * ab + al; const vol = ab * h;
             return `
-                <p><strong class="text-sky-400">Área da Base (Ab = π × r²):</strong><br> <span class="text-amber-300 font-mono font-bold">${ab.toFixed(2)}</span></p>
-                <p><strong class="text-emerald-400">Área Lateral (Al = 2 × π × r × h):</strong><br> <span class="text-amber-300 font-mono font-bold">${al.toFixed(2)}</span></p>
-                <p><strong class="text-emerald-300">Área Total (At = 2×Ab + Al):</strong><br> <span class="text-amber-300 font-mono font-bold">${at.toFixed(2)}</span></p>
-                <p><strong class="text-white">Volume (V = Ab × h):</strong><br> <span class="text-amber-300 font-mono font-bold">${vol.toFixed(2)}</span></p>
+                <p><strong class="text-sky-400">Area da Base (Ab = PI x r^2):</strong><br> <span class="text-amber-300 font-mono font-bold">${ab.toFixed(2)}</span></p>
+                <p><strong class="text-emerald-400">Area Lateral (Al = 2 x PI x r x h):</strong><br> <span class="text-amber-300 font-mono font-bold">${al.toFixed(2)}</span></p>
+                <p><strong class="text-emerald-300">Area Total (At = 2xAb + Al):</strong><br> <span class="text-amber-300 font-mono font-bold">${at.toFixed(2)}</span></p>
+                <p><strong class="text-white">Volume (V = Ab x h):</strong><br> <span class="text-amber-300 font-mono font-bold">${vol.toFixed(2)}</span></p>
             `;
         }
     },
@@ -179,15 +181,15 @@ const shapeConfigs = {
             const ab = Math.PI * Math.pow(r, 2); const al = Math.PI * r * g;
             const vol = (1 / 3) * ab * h;
             return `
-                <p><strong class="text-sky-400">Área da Base (Ab = π × r²):</strong><br> <span class="text-amber-300 font-mono font-bold">${ab.toFixed(2)}</span></p>
-                <p class="text-xs text-slate-400">Geratriz (g = √(r² + h²)): ${g.toFixed(2)}</p>
-                <p><strong class="text-emerald-400">Área Lateral (Al = π × r × g):</strong><br> <span class="text-amber-300 font-mono font-bold">${al.toFixed(2)}</span></p>
-                <p><strong class="text-white">Volume (V = 1/3 × Ab × h):</strong><br> <span class="text-amber-300 font-mono font-bold">${vol.toFixed(2)}</span></p>
+                <p><strong class="text-sky-400">Area da Base (Ab = PI x r^2):</strong><br> <span class="text-amber-300 font-mono font-bold">${ab.toFixed(2)}</span></p>
+                <p class="text-xs text-slate-400">Geratriz (g = v(r^2 + h^2)): ${g.toFixed(2)}</p>
+                <p><strong class="text-emerald-400">Area Lateral (Al = PI x r x g):</strong><br> <span class="text-amber-300 font-mono font-bold">${al.toFixed(2)}</span></p>
+                <p><strong class="text-white">Volume (V = 1/3 x Ab x h):</strong><br> <span class="text-amber-300 font-mono font-bold">${vol.toFixed(2)}</span></p>
             `;
         }
     },
     pyramid: {
-        name: "Pirâmide Quadrangular Reta",
+        name: "Piramide Quadrangular Reta",
         params: [
             { id: 'baseW', label: 'Lado da Base (l)', value: 2 },
             { id: 'height', label: 'Altura (h)', value: 2.5 }
@@ -197,9 +199,9 @@ const shapeConfigs = {
             const ab = l * l; const al_apotema = Math.sqrt(Math.pow(h, 2) + Math.pow(l / 2, 2));
             const al = 2 * l * al_apotema; const vol = (1 / 3) * ab * h;
             return `
-                <p><strong class="text-sky-400">Área da Base (Ab = l²):</strong><br> <span class="text-amber-300 font-mono font-bold">${ab.toFixed(2)}</span></p>
-                <p><strong class="text-emerald-400">Área Lateral (Al = 2 × l × al):</strong><br> <span class="text-amber-300 font-mono font-bold">${al.toFixed(2)}</span></p>
-                <p><strong class="text-white">Volume (V = 1/3 × Ab × h):</strong><br> <span class="text-amber-300 font-mono font-bold">${vol.toFixed(2)}</span></p>
+                <p><strong class="text-sky-400">Area da Base (Ab = l^2):</strong><br> <span class="text-amber-300 font-mono font-bold">${ab.toFixed(2)}</span></p>
+                <p><strong class="text-emerald-400">Area Lateral (Al = 2 x l x ap):</strong><br> <span class="text-amber-300 font-mono font-bold">${al.toFixed(2)}</span></p>
+                <p><strong class="text-white">Volume (V = 1/3 x Ab x h):</strong><br> <span class="text-amber-300 font-mono font-bold">${vol.toFixed(2)}</span></p>
             `;
         }
     },
@@ -214,8 +216,8 @@ const shapeConfigs = {
             const area = 4 * Math.PI * Math.PI * R * r;
             const vol = 2 * Math.PI * Math.PI * R * r * r;
             return `
-                <p><strong class="text-emerald-400">Área Superficial (A = 4π²·R·r):</strong><br> <span class="text-amber-300 font-mono font-bold">${area.toFixed(2)}</span></p>
-                <p><strong class="text-white">Volume (V = 2π²·R·r²):</strong><br> <span class="text-amber-300 font-mono font-bold">${vol.toFixed(2)}</span></p>
+                <p><strong class="text-emerald-400">Area Superficial (A = 4PI^2.R.r):</strong><br> <span class="text-amber-300 font-mono font-bold">${area.toFixed(2)}</span></p>
+                <p><strong class="text-white">Volume (V = 2PI^2.R.r^2):</strong><br> <span class="text-amber-300 font-mono font-bold">${vol.toFixed(2)}</span></p>
             `;
         }
     },
@@ -230,9 +232,9 @@ const shapeConfigs = {
             const ab = (Math.sqrt(3) / 4) * l * l;
             const al = 3 * l * h; const vol = ab * h;
             return `
-                <p><strong class="text-sky-400">Área da Base (Ab):</strong><br> <span class="text-amber-300 font-mono font-bold">${ab.toFixed(2)}</span></p>
-                <p><strong class="text-emerald-400">Área Total (2·Ab + Al):</strong><br> <span class="text-amber-300 font-mono font-bold">${(2*ab + al).toFixed(2)}</span></p>
-                <p><strong class="text-white">Volume (V = Ab × h):</strong><br> <span class="text-amber-300 font-mono font-bold">${vol.toFixed(2)}</span></p>
+                <p><strong class="text-sky-400">Area da Base (Ab):</strong><br> <span class="text-amber-300 font-mono font-bold">${ab.toFixed(2)}</span></p>
+                <p><strong class="text-emerald-400">Area Total (2.Ab + Al):</strong><br> <span class="text-amber-300 font-mono font-bold">${(2*ab + al).toFixed(2)}</span></p>
+                <p><strong class="text-white">Volume (V = Ab x h):</strong><br> <span class="text-amber-300 font-mono font-bold">${vol.toFixed(2)}</span></p>
             `;
         }
     },
@@ -246,8 +248,8 @@ const shapeConfigs = {
             const area = 2 * Math.sqrt(3) * a * a;
             const vol = (Math.sqrt(2) / 3) * Math.pow(a, 3);
             return `
-                <p><strong class="text-emerald-400">Área Total (A = 2√3·a²):</strong><br> <span class="text-amber-300 font-mono font-bold">${area.toFixed(2)}</span></p>
-                <p><strong class="text-white">Volume (V = √2/3·a³):</strong><br> <span class="text-amber-300 font-mono font-bold">${vol.toFixed(2)}</span></p>
+                <p><strong class="text-emerald-400">Area Total (A = 2v3.a^2):</strong><br> <span class="text-amber-300 font-mono font-bold">${area.toFixed(2)}</span></p>
+                <p><strong class="text-white">Volume (V = v2/3.a^3):</strong><br> <span class="text-amber-300 font-mono font-bold">${vol.toFixed(2)}</span></p>
             `;
         }
     },
@@ -261,8 +263,8 @@ const shapeConfigs = {
             const area = 3 * Math.sqrt(25 + 10 * Math.sqrt(5)) * a * a;
             const vol = ((15 + 7 * Math.sqrt(5)) / 4) * Math.pow(a, 3);
             return `
-                <p><strong class="text-emerald-400">Área Total (A = 3√(25+10√5)·a²):</strong><br> <span class="text-amber-300 font-mono font-bold">${area.toFixed(2)}</span></p>
-                <p><strong class="text-white">Volume (V = 1/4·(15+7√5)·a³):</strong><br> <span class="text-amber-300 font-mono font-bold">${vol.toFixed(2)}</span></p>
+                <p><strong class="text-emerald-400">Area Total (A = 3v(25+10v5).a^2):</strong><br> <span class="text-amber-300 font-mono font-bold">${area.toFixed(2)}</span></p>
+                <p><strong class="text-white">Volume (V = 1/4.(15+7v5).a^3):</strong><br> <span class="text-amber-300 font-mono font-bold">${vol.toFixed(2)}</span></p>
             `;
         }
     },
@@ -276,13 +278,13 @@ const shapeConfigs = {
             const area = 5 * Math.sqrt(3) * a * a;
             const vol = (5 / 12) * (3 + Math.sqrt(5)) * Math.pow(a, 3);
             return `
-                <p><strong class="text-emerald-400">Área Total (A = 5√3·a²):</strong><br> <span class="text-amber-300 font-mono font-bold">${area.toFixed(2)}</span></p>
-                <p><strong class="text-white">Volume (V = 5/12(3+√5)a³):</strong><br> <span class="text-amber-300 font-mono font-bold">${vol.toFixed(2)}</span></p>
+                <p><strong class="text-emerald-400">Area Total (A = 5v3.a^2):</strong><br> <span class="text-amber-300 font-mono font-bold">${area.toFixed(2)}</span></p>
+                <p><strong class="text-white">Volume (V = 5/12(3+v5)a^3):</strong><br> <span class="text-amber-300 font-mono font-bold">${vol.toFixed(2)}</span></p>
             `;
         }
     },
     capsule: {
-        name: "Cápsula",
+        name: "Capsula",
         params: [
             { id: 'radius', label: 'Raio (r)', value: 0.8 },
             { id: 'height', label: 'Comprimento Central (h)', value: 1.8 }
@@ -293,13 +295,13 @@ const shapeConfigs = {
             const area = 2 * Math.PI * r * (2 * r + h);
             const vol = Math.PI * r * r * ((4 / 3) * r + h);
             return `
-                <p><strong class="text-emerald-400">Área Externa (A = 2πr(2r+h)):</strong><br> 2 × π × ${r} × (2 × ${r} + ${h}) = <span class="text-amber-300 font-mono font-bold">${area.toFixed(2)}</span></p>
-                <p><strong class="text-white">Volume Total (V = πr²(4/3·r+h)):</strong><br> π × ${r}² × (4/3 × ${r} + ${h}) = <span class="text-amber-300 font-mono font-bold">${vol.toFixed(2)}</span></p>
+                <p><strong class="text-emerald-400">Area Externa (A = 2PI.r.(2r+h)):</strong><br> 2 x PI x ${r} x (2 x ${r} + ${h}) = <span class="text-amber-300 font-mono font-bold">${area.toFixed(2)}</span></p>
+                <p><strong class="text-white">Volume Total (V = PI.r^2.(4/3.r+h)):</strong><br> PI x ${r}^2 x (4/3 x ${r} + ${h}) = <span class="text-amber-300 font-mono font-bold">${vol.toFixed(2)}</span></p>
             `;
         }
     },
     torusknot: {
-        name: "Nó Toroidal",
+        name: "No Toroidal",
         params: [
             { id: 'radius', label: 'Raio Principal (R)', value: 1.2 },
             { id: 'tube', label: 'Raio do Tubo (r)', value: 0.4 }
@@ -310,8 +312,8 @@ const shapeConfigs = {
             const area = 4 * Math.PI * Math.PI * R * r;
             const vol = 2 * Math.PI * Math.PI * R * r * r;
             return `
-                <p><strong class="text-emerald-400">Área Aproximada (A ≈ 4π²·R·r):</strong><br> 4 × π² × ${R} × ${r} = <span class="text-amber-300 font-mono font-bold">${area.toFixed(2)}</span></p>
-                <p><strong class="text-white">Volume Approximado (V ≈ 2π²·R·r²):</strong><br> 2 × π² × ${R} × ${r}² = <span class="text-amber-300 font-mono font-bold">${vol.toFixed(2)}</span></p>
+                <p><strong class="text-emerald-400">Area Aproximada (A = 4PI^2.R.r):</strong><br> 4 x PI^2 x ${R} x ${r} = <span class="text-amber-300 font-mono font-bold">${area.toFixed(2)}</span></p>
+                <p><strong class="text-white">Volume Aproximado (V = 2PI^2.R.r^2):</strong><br> 2 x PI^2 x ${R} x ${r}^2 = <span class="text-amber-300 font-mono font-bold">${vol.toFixed(2)}</span></p>
             `;
         }
     }
@@ -334,7 +336,7 @@ function generateControls(rawShapeKey) {
     const config = shapeConfigs[shapeKey];
     
     if (!config) {
-        formulaContainer.innerHTML = `<p class="text-rose-400 text-xs">Configuração não encontrada para: ${rawShapeKey}</p>`;
+        formulaContainer.innerHTML = `<p class="text-rose-400 text-xs">Configuracao nao encontrada</p>`;
         return;
     }
 
@@ -342,7 +344,7 @@ function generateControls(rawShapeKey) {
         const wrapper = document.createElement('div');
         wrapper.className = 'flex flex-col gap-1';
         wrapper.innerHTML = `
-            <label for="${param.id}" class="text-xs font-medium text-slate-400">${param.label}</label>
+            <label class="text-xs font-medium text-slate-400">${param.label}</label>
             <input type="number" id="${param.id}" value="${param.value}" step="0.1" min="0.1" max="10"
                 class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2 text-white font-mono text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
         `;
@@ -353,6 +355,7 @@ function generateControls(rawShapeKey) {
 }
 
 function updateGeometryAndCalculations() {
+    if (!shapeSelect) return;
     const shapeKey = getSafeShapeKey(shapeSelect.value);
     const config = shapeConfigs[shapeKey];
     if (!config) return;
@@ -367,23 +370,9 @@ function updateGeometryAndCalculations() {
     });
 
     if (hasInvalidValue) {
-        formulaContainer.innerHTML = `<h3 class="font-bold text-emerald-300 text-base mb-2">${config.name}</h3><p class="text-rose-400 text-xs">Valores inválidos.</p>`;
+        formulaContainer.innerHTML = `<h3 class="font-bold text-emerald-300 text-base mb-2">${config.name}</h3><p class="text-rose-400 text-xs">Valores invalidos.</p>`;
     } else {
-        if (typeof config.calculate === "function") {
-            formulaContainer.innerHTML =
-                `<h3 class="font-bold text-emerald-300 text-base mb-2">
-                    ${config.name}
-                </h3>
-                ${config.calculate(values)}`;
-        } else {
-            formulaContainer.innerHTML =
-                `<h3 class="font-bold text-emerald-300 text-base mb-2">
-                    ${config.name}
-                </h3>
-                <p class="text-amber-300">
-                    Fórmulas não disponíveis.
-                </p>`;
-        }
+        formulaContainer.innerHTML = `<h3 class="font-bold text-emerald-300 text-base mb-2">${config.name}</h3>${config.calculate(values)}`;
     }
 
     let prevQuaternion = new THREE.Quaternion();
@@ -395,96 +384,136 @@ function updateGeometryAndCalculations() {
     }
 
     currentObjectGroup = new THREE.Group();
-    let geo; let mats = materialMain;
+    let geo = null; 
+    let mats = materialMain;
     const limit = (val) => Math.min(val, 4); 
 
-    switch (shapeKey) {
-        case 'cube':
-            geo = new THREE.BoxGeometry(limit(values.width), limit(values.height), limit(values.depth));
-            mats = [materialMain, materialMain, materialBase, materialBase, materialMain, materialMain];
+    if (shapeKey === 'capsule') {
+        const r = limit(values.radius);
+        const h = limit(values.height);
+
+        const cylinderGeo = new THREE.CylinderGeometry(r, r, h, 32, 1, true);
+        const cylinderMesh = new THREE.Mesh(cylinderGeo, materialMain);
+        currentObjectGroup.add(cylinderMesh);
+
+        const topSphereGeo = new THREE.SphereGeometry(r, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+        const topSphereMesh = new THREE.Mesh(topSphereGeo, materialBase);
+        topSphereMesh.position.y = h / 2;
+        currentObjectGroup.add(topSphereMesh);
+
+        const bottomSphereGeo = new THREE.SphereGeometry(r, 32, 16, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+        const bottomSphereMesh = new THREE.Mesh(bottomSphereGeo, materialBase);
+        bottomSphereMesh.position.y = -h / 2;
+        currentObjectGroup.add(bottomSphereMesh);
+
+        const cylinderEdges = new THREE.EdgesGeometry(cylinderGeo);
+        currentObjectGroup.add(new THREE.LineSegments(cylinderEdges, wireframeMaterial));
+        
+        const topEdges = new THREE.EdgesGeometry(topSphereGeo);
+        const topLines = new THREE.LineSegments(topEdges, wireframeMaterial);
+        topLines.position.y = h / 2;
+        currentObjectGroup.add(topLines);
+
+        const bottomEdges = new THREE.EdgesGeometry(bottomSphereGeo);
+        const bottomLines = new THREE.LineSegments(bottomEdges, wireframeMaterial);
+        bottomLines.position.y = -h / 2;
+        currentObjectGroup.add(bottomLines);
+    } else {
+        switch (shapeKey) {
+            case 'cube':
+                geo = new THREE.BoxGeometry(limit(values.width), limit(values.height), limit(values.depth));
+                mats = [materialMain, materialMain, materialBase, materialBase, materialMain, materialMain];
+                break;
+            case 'sphere':
+                geo = new THREE.SphereGeometry(limit(values.radius), 24, 16);
+                break;
+            case 'cylinder':
+                geo = new THREE.CylinderGeometry(limit(values.radius), limit(values.radius), limit(values.height), 32);
+                mats = [materialMain, materialBase, materialBase];
+                break;
+            case 'cone':
+            // 1. Cria o corpo do cone (aberto embaixo)
+            const coneBodyGeo = new THREE.ConeGeometry(limit(values.radius), limit(values.height), 24, 1, true);
+            const coneBody = new THREE.Mesh(coneBodyGeo, materialMain);
+            currentObjectGroup.add(coneBody);
+
+            // 2. Cria a base circular separada
+            const coneBaseGeo = new THREE.CircleGeometry(limit(values.radius), 24);
+            const coneBase = new THREE.Mesh(coneBaseGeo, materialBase);
+            coneBase.rotation.x = Math.PI / 2; 
+            coneBase.position.y = -limit(values.height) / 2; 
+            currentObjectGroup.add(coneBase);
+
+            // 3. Cria as linhas brancas extraindo direto das formas criadas acima
+            const coneEdges = new THREE.EdgesGeometry(coneBodyGeo);
+            const coneLineSegments = new THREE.LineSegments(coneEdges, wireframeMaterial);
+            currentObjectGroup.add(coneLineSegments);
+
+            const coneBaseEdges = new THREE.EdgesGeometry(coneBaseGeo);
+            const coneBaseLines = new THREE.LineSegments(coneBaseEdges, wireframeMaterial);
+            coneBaseLines.rotation.x = Math.PI / 2;
+            coneBaseLines.position.y = -limit(values.height) / 2;
+            currentObjectGroup.add(coneBaseLines);
+
+            geo = null; // Anula para não duplicar no código abaixo do switch
             break;
-        case 'sphere':
-            geo = new THREE.SphereGeometry(limit(values.radius), 24, 16);
-            break;
-        case 'cylinder':
-            geo = new THREE.CylinderGeometry(limit(values.radius), limit(values.radius), limit(values.height), 32);
-            mats = [materialMain, materialBase, materialBase];
-            break;
-        case 'cone':
-            geo = new THREE.ConeGeometry(limit(values.radius), limit(values.height), 24);
-            mats = [materialMain, materialBase];
-            break;
+
         case 'pyramid':
-            geo = new THREE.ConeGeometry(limit(values.baseW) / Math.sqrt(2), limit(values.height), 4, 1, false, Math.PI/4);
-            mats = [materialMain, materialBase];
-            break;
-        case 'torus':
-            geo = new THREE.TorusGeometry(limit(values.radius), limit(values.tube), 12, 48);
-            break;
-        case 'prism':
-            geo = new THREE.CylinderGeometry(limit(values.side)/Math.sqrt(3), limit(values.side)/Math.sqrt(3), limit(values.height), 3);
-            mats = [materialMain, materialBase, materialBase];
-            break;
-        case 'octahedron':
-            geo = new THREE.OctahedronGeometry(limit(values.radius), 0);
-            break;
-        case 'dodecahedron':
-            geo = new THREE.DodecahedronGeometry(limit(values.radius), 0);
-            break;
-        case 'icosahedron':
-            geo = new THREE.IcosahedronGeometry(limit(values.radius), 0);
-            break;
-        case 'capsule':
-            // Criação manual da Cápsula juntando Cilindro + Calotas Esféricas
-            geo = new THREE.BufferGeometry(); 
-            const r = limit(values.radius);
-            const h = limit(values.height);
+            // 1. Cria o corpo da pirâmide (aberto embaixo)
+            const pyrBodyGeo = new THREE.ConeGeometry(limit(values.baseW) / Math.sqrt(2), limit(values.height), 4, 1, true, Math.PI/4);
+            const pyrBody = new THREE.Mesh(pyrBodyGeo, materialMain);
+            currentObjectGroup.add(pyrBody);
 
-            const cylinderGeo = new THREE.CylinderGeometry(r, r, h, 32, 1, true);
-            const cylinderMesh = new THREE.Mesh(cylinderGeo, materialMain);
-            currentObjectGroup.add(cylinderMesh);
+            // 2. Cria a base quadrada separada
+            const pyrBaseGeo = new THREE.PlaneGeometry(limit(values.baseW), limit(values.baseW));
+            const pyrBase = new THREE.Mesh(pyrBaseGeo, materialBase);
+            pyrBase.rotation.x = Math.PI / 2; 
+            pyrBase.position.y = -limit(values.height) / 2; 
+            currentObjectGroup.add(pyrBase);
 
-            const topSphereGeo = new THREE.SphereGeometry(r, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
-            const topSphereMesh = new THREE.Mesh(topSphereGeo, materialBase);
-            topSphereMesh.position.y = h / 2;
-            currentObjectGroup.add(topSphereMesh);
+            // 3. Cria as linhas brancas extraindo direto das formas criadas acima
+            const pyrEdges = new THREE.EdgesGeometry(pyrBodyGeo);
+            const pyrLineSegments = new THREE.LineSegments(pyrEdges, wireframeMaterial);
+            currentObjectGroup.add(pyrLineSegments);
 
-            const bottomSphereGeo = new THREE.SphereGeometry(r, 32, 16, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
-            const bottomSphereMesh = new THREE.Mesh(bottomSphereGeo, materialBase);
-            bottomSphereMesh.position.y = -h / 2;
-            currentObjectGroup.add(bottomSphereMesh);
+            const pyrBaseEdges = new THREE.EdgesGeometry(pyrBaseGeo);
+            const pyrBaseLines = new THREE.LineSegments(pyrBaseEdges, wireframeMaterial);
+            pyrBaseLines.rotation.x = Math.PI / 2;
+            pyrBaseLines.position.y = -limit(values.height) / 2;
+            currentObjectGroup.add(pyrBaseLines);
 
-            const cylinderEdges = new THREE.EdgesGeometry(cylinderGeo);
-            currentObjectGroup.add(new THREE.LineSegments(cylinderEdges, wireframeMaterial));
-            
-            const topEdges = new THREE.EdgesGeometry(topSphereGeo);
-            const topLines = new THREE.LineSegments(topEdges, wireframeMaterial);
-            topLines.position.y = h / 2;
-            currentObjectGroup.add(topLines);
-
-            const bottomEdges = new THREE.EdgesGeometry(bottomSphereGeo);
-            const bottomLines = new THREE.LineSegments(bottomEdges, wireframeMaterial);
-            bottomLines.position.y = -h / 2;
-            currentObjectGroup.add(bottomLines);
+            geo = null; // Anula para não duplicar no código abaixo do switch
             break;
-        case 'torusknot':
-            geo = new THREE.TorusKnotGeometry(limit(values.radius), limit(values.tube), 64, 8, 2, 3);
-            break;
-    }
+            case 'torus':
+                geo = new THREE.TorusGeometry(limit(values.radius), limit(values.tube), 12, 48);
+                break;
+            case 'prism':
+                geo = new THREE.CylinderGeometry(limit(values.side)/Math.sqrt(3), limit(values.side)/Math.sqrt(3), limit(values.height), 3);
+                mats = [materialMain, materialBase, materialBase];
+                break;
+            case 'octahedron':
+                geo = new THREE.OctahedronGeometry(limit(values.radius), 0);
+                break;
+            case 'dodecahedron':
+                geo = new THREE.DodecahedronGeometry(limit(values.radius), 0);
+                break;
+            case 'icosahedron':
+                geo = new THREE.IcosahedronGeometry(limit(values.radius), 0);
+                break;
+            case 'torusknot':
+                geo = new THREE.TorusKnotGeometry(limit(values.radius), limit(values.tube), 64, 8, 2, 3);
+                break;
+        }
 
-    if (!geo) {
-        console.error("Geometria não criada:", shapeKey);
-        return;
-    }
+       if (shapeKey !== 'capsule' && geo) {
+            const mesh = new THREE.Mesh(geo, mats);
+            currentObjectGroup.add(mesh);
 
-    if (shapeKey !== 'capsule') {
-        const mesh = new THREE.Mesh(geo, mats);
-        currentObjectGroup.add(mesh);
-
-        if (shapeKey !== "torusknot") {
-            const edges = new THREE.EdgesGeometry(geo);
-            const lineSegments = new THREE.LineSegments(edges, wireframeMaterial);
-            currentObjectGroup.add(lineSegments);
+            if (shapeKey !== "torusknot") {
+                const edges = new THREE.EdgesGeometry(geo);
+                const lineSegments = new THREE.LineSegments(edges, wireframeMaterial);
+                currentObjectGroup.add(lineSegments);
+            }
         }
     }
 
@@ -492,14 +521,16 @@ function updateGeometryAndCalculations() {
     scene.add(currentObjectGroup);
 }
 
-shapeSelect.addEventListener('change', () => generateControls(shapeSelect.value));
+if (shapeSelect) {
+    shapeSelect.addEventListener('change', () => generateControls(shapeSelect.value));
+    generateControls(shapeSelect.value);
+}
+
 window.addEventListener('resize', () => {
     camera.aspect = container.clientWidth / container.clientHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(container.clientWidth, container.clientHeight);
 });
-
-generateControls(shapeSelect.value);
 
 function animate() {
     requestAnimationFrame(animate);

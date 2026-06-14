@@ -35,7 +35,8 @@ let currentObjectGroup;
 // ==========================================
 let isDragging = false;
 let previousMousePosition = { x: 0, y: 0 };
-let autoRotation = { x: 0.002, y: 0.004 };
+// Rotação automática suave distribuída nos eixos X, Y e Z
+let autoRotation = { x: 0.002, y: 0.004, z: 0.001 }; 
 
 // Limites de Zoom Seguros (Distância da Câmera)
 const MIN_ZOOM = 3;
@@ -71,17 +72,34 @@ zoomSlider.addEventListener('input', (e) => {
     applyZoom(parseFloat(e.target.value));
 });
 
-// Lógica de Rotação por Arraste (Mouse e Touch)
+// Lógica de Rotação por Arraste Livre (X, Y, Z usando Quaternions)
 let initialTouchDist = 0; // Armazena a distância inicial no gesto de pinça mobile
 
-const startDrag = (x, y) => { isDragging = true; previousMousePosition = { x, y }; autoRotation = { x: 0, y: 0 }; };
+const startDrag = (x, y) => { 
+    isDragging = true; 
+    previousMousePosition = { x, y }; 
+    autoRotation = { x: 0, y: 0, z: 0 }; // Para o giro automático ao interagir
+};
+
 const endDrag = () => { isDragging = false; initialTouchDist = 0; };
 
 const moveDrag = (x, y) => {
     if (isDragging && currentObjectGroup) {
         const deltaMove = { x: x - previousMousePosition.x, y: y - previousMousePosition.y };
-        currentObjectGroup.rotation.y += deltaMove.x * 0.01;
-        currentObjectGroup.rotation.x += deltaMove.y * 0.01;
+
+        // Cria uma rotação baseada no deslocamento do mouse/touch
+        // O movimento vertical (y) vira o objeto no eixo X, o horizontal (x) vira no eixo Y
+        const deltaRotationQuaternion = new THREE.Quaternion()
+            .setFromEuler(new THREE.Euler(
+                deltaMove.y * 0.01,
+                deltaMove.x * 0.01,
+                0,
+                'XYZ'
+            ));
+        
+        // Multiplica o estado atual pelo deslocamento para rotacionar livremente em 360° sem travar eixos
+        currentObjectGroup.quaternion.multiplyQuaternions(deltaRotationQuaternion, currentObjectGroup.quaternion);
+
         previousMousePosition = { x, y };
     }
 };
@@ -287,10 +305,14 @@ function updateGeometryAndCalculations() {
         formulaContainer.innerHTML = `<h3 class="font-bold text-emerald-300 text-base mb-2">${config.name}</h3>${config.calculate(values)}`;
     }
 
-    let prevRotation = { x: autoRotation.x, y: autoRotation.y, z: 0 };
+    // Salva o estado de rotação atual através do Quaternion antes de recriar a malha
+    let prevQuaternion = new THREE.Quaternion();
     if (currentObjectGroup) {
-        prevRotation = { x: currentObjectGroup.rotation.x, y: currentObjectGroup.rotation.y, z: currentObjectGroup.rotation.z };
+        prevQuaternion.copy(currentObjectGroup.quaternion);
         scene.remove(currentObjectGroup);
+    } else {
+        // Rotação inicial padrão levemente inclinada para fins estéticos
+        prevQuaternion.setFromEuler(new THREE.Euler(0.3, 0.5, 0));
     }
 
     currentObjectGroup = new THREE.Group();
@@ -329,7 +351,8 @@ function updateGeometryAndCalculations() {
     const lineSegments = new THREE.LineSegments(edges, wireframeMaterial);
     currentObjectGroup.add(lineSegments);
 
-    currentObjectGroup.rotation.set(prevRotation.x, prevRotation.y, prevRotation.z);
+    // Reaplica a rotação anterior
+    currentObjectGroup.quaternion.copy(prevQuaternion);
     scene.add(currentObjectGroup);
 }
 
@@ -351,8 +374,10 @@ generateControls(shapeSelect.value);
 function animate() {
     requestAnimationFrame(animate);
     if (!isDragging && currentObjectGroup) {
-        currentObjectGroup.rotation.y += autoRotation.y;
+        // Rotação automática suave atuando nos três eixos (X, Y, Z) de forma incremental
         currentObjectGroup.rotation.x += autoRotation.x;
+        currentObjectGroup.rotation.y += autoRotation.y;
+        currentObjectGroup.rotation.z += autoRotation.z;
     }
     renderer.render(scene, camera);
 }
